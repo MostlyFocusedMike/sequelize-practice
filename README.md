@@ -59,6 +59,23 @@ By default, if you just use things on the Sequelize init side like:
 ```
 It does not add a foreign Key restraint in SQL. Again, nothing that init/define does actually affects the structure, only the queries generated. Constants like that should be generated in the migrations
 
+Also, even though in the SQL table the relationship doesn't affect the parent, in Sequelize, the parent needs to know about its child:
+
+```js
+Wish.belongsTo(Wishlist);
+Wishlist.hasMany(Wish);
+
+const wishlist = await Wishlist.findOne();
+const wishes = await wishlist.getWishes();
+const wish = await wishlist.createWish({
+  title: 'Toys', quantity: 3,
+});
+
+await wishlist.removeWish(wish);
+```
+
+The reason is simple, Sequelize needs to put methods on both the parent and child.
+
 ### Migrations/Table requirements
 Sequelize is just a query generator, so the only kind of queries that can actually affect the tables are TABLE, ALTER TABLE etc, queries, and those are only run in the migrations. Sequelize migrations are a lot like Knex migrations, in that you have a handful of special methods on the queryInterface (see https://sequelize.org/docs/v6/other-topics/query-interface/). This is a lower level API than the standard Sequelize instance and deals primarily with table architecture and bulk data actions (list of methods https://sequelize.org/api/v6/class/src/dialects/abstract/query-interface.js~queryinterface).
 
