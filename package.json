@@ -1,0 +1,19 @@
+{
+  "name": "sequelize-practice",
+  "version": "1.0.0",
+  "description": "# Cool Links https://www.citusdata.com/blog/2016/07/14/choosing-nosql-hstore-json-jsonb/ - That talks about the differences between the unstructured Data types which summarizes as:   ```   JSONB - In most cases",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.3",
+    "nodemon": "^2.0.15",
+    "pg": "^8.7.3",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.18.0"
+  }
+}
