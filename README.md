@@ -15,7 +15,7 @@ Sequelize command line things:
   - this makes a new seed file
 
 - sequelize db:seed:all
-  - this will run all the seed files
+  - this will run all the seed files. Also, there's apparently a seed down function, which seems interesting. I thought seeds wiped themselves before starting always, but this at least gives options (I wrote mine to wipe every time)
 
 ## Sequelize Notes
 ### Default columns
@@ -25,7 +25,7 @@ With no modifications, Sequelize expects there to be `id, createdAt, updatedAt` 
   - https://stackoverflow.com/questions/20386402/sequelize-unknown-column-createdat-in-field-list
 - Use underscores
   - If you have the table column names that use snake case, just have `underscored: true,` in the model options, which will then generate queries like: `SELECT "id", "created_at" AS "createdAt", "updated_at" AS "updatedAt" FROM "users" AS "User";` where the returned values are in the JS camelCase, but the raw column is snake_case
-- Redfine them
+- Redefine them
   - In them model you can tell it what the fields are in the options object like: `{createdAt: created, updatedAt: updated}`
 - Model vs sequelize
   - While you can include model by model, if you want, you can also include the whole thing in the init of sequelize
@@ -41,7 +41,7 @@ With no modifications, Sequelize expects there to be `id, createdAt, updatedAt` 
     ```
 
 ### What is define/init
-If you use the outdated define method, know that Sequelize calls the same `init` ES6+ method, so they mean the same thing. And what these methods do is create a model in Sequelize to link to tables. This DOES NOT AFFECT the actual tables in *any* way. What it does affect are the queries. Leaving things out of the init fields will mean Sequelize won't know about them. This means using Sequelize.create, the fields wouldn't be there (conversely, using sequelize.find* methods, these fields would not be returned).
+If you use the somewhat outdated define method, know that Sequelize calls the same `init` ES6+ method, so they mean the same thing. And what these methods do is create a model in Sequelize to link to tables. This DOES NOT AFFECT the actual tables in *any* way. What it does affect are the queries. Leaving things out of the init fields will mean Sequelize won't know about them. This means using Sequelize.create, the fields wouldn't be there (conversely, using sequelize.find* methods, these fields would not be returned).
 
 The only fields that are not affected by the init fields are `id, updatedAt, createdAt`. Queries will always run with those fields. If you want to modify the timestamps, you can in init's settings object (eg set the query to look for underscored versions). Also, on create, sequelize will automatically generate timestamps itself for `updatedAt and createdAt`, it does not set a default `NOW()` in the table SQL.
 
@@ -65,6 +65,28 @@ Sequelize is just a query generator, so the only kind of queries that can actual
 However, it's still a regular JS file, so you can gain access to the niceties of Sequelize by importing the models like you would into app.js in this example.
 
 As previously discussed, every table should have a primary id (which defaults to `id` not `tableName+id`, didn't bother looking how to change that) and some form of created and updated columns.
+
+### Paranoid Destroy
+So if you want to delete a row, you can use the `.destroy()` method. However, destroy also has a cool "paranoid" mode that you can pass into a models settings:
+```js
+    { paranoid: true }
+```
+In order to use paranoid settings, you need a `deletedAt` (or `deleted_at` when using `underscored`) on your table. But with paranoid in place, destroy objects will hid them from all Sequelize methods:
+
+```js
+const User = sequelize.define("User", {
+  { username: Sequelize.STRING },
+  { paranoid: true },
+});
+
+const user = await User.findOne();
+
+await user.destroy();
+await User.findAll(); // non-deleted only
+await User.findAll({ paranoid: false }); // all
+```
+
+I just thought this was kind of neat. This would have no effect on raw queries.
 
 # Cool Links
 https://www.citusdata.com/blog/2016/07/14/choosing-nosql-hstore-json-jsonb/

@@ -50,9 +50,6 @@ module.exports = (sequelize, DataTypes) => {
           notEmpty: { msg: 'role must not be empty' },
         },
       },
-      test: {
-        type: DataTypes.STRING,
-      },
     },
     {
       sequelize,

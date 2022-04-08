@@ -20,9 +20,11 @@ app.post('/users', async (req, res) => {
 
 app.get('/users', async (req, res) => {
   try {
-    const users = await User.findAll()
+    let users = await User.findAll()
     const user = users[0]
+    user.destroy()
     // console.log('user:', user.id);
+    users = await User.findAll()
     return res.json(users)
   } catch (err) {
     console.log(err)
